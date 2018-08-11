@@ -3,6 +3,7 @@
  */
 import React from 'react'
 import ReactDOM from 'react-dom'
+// import App from './App';
 import {HashRouter, Switch, Route} from 'react-router-dom'
 
 import Login from './containers/login/login'
@@ -19,3 +20,5 @@ ReactDOM.render((
   </HashRouter>
 ), document.getElementById('root'));
 
+/*
+ReactDOM.render(<App />,document.getElementById('root'));*/
