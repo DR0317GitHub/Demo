@@ -15,3 +15,9 @@ export const reqRegister = ({username, password, type}) => ajax(BASE+'/register'
 
 // ## 2、登陆
 export const reqLogin = (username, password) => ajax(BASE+'/login', {username, password}, 'POST')
+
+// ## 3. 更新用户信息
+export const reqUpdateUser = (user) => ajax(BASE+'/update', user, 'POST');
+
+// ## 4. 获取当前用户信息
+export const reqUser = () => ajax(BASE+'/user');
