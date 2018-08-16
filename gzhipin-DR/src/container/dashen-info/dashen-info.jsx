@@ -54,4 +54,3 @@ export default connect(
   state => ({user: state.user}),
   {updateUser}
 )(DashenInfo)
-

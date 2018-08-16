@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import {NavBar, List, WingBlank, WhiteSpace, InputItem, Button} from 'antd-mobile'
+import {NavBar, List, WingBlank, WhiteSpace, InputItem, Radio, Button} from 'antd-mobile'
 import {connect} from 'react-redux'
 import {Redirect} from 'react-router-dom'
 
@@ -37,8 +37,8 @@ class Login extends Component {
 
   render () {
 
-    const {type} = this.state;
-    const {msg, redirectTo} = this.props.user;
+    const {type} = this.state
+    const {msg, redirectTo} = this.props.user
     // 判断是否需要自动跳转
     if(redirectTo) {
       return <Redirect to={redirectTo}/>  // 在render()中实现自动跳转指定路由
@@ -50,7 +50,7 @@ class Login extends Component {
         <Logo/>
         <WingBlank>
           <List>
-            <p>{msg}</p>
+            <p className='error-msg'>{msg}</p>
 
             <InputItem type='text' placeholder='请输入用户名'
                        onChange={(val) => this.handleChange('username', val)}>用户名: </InputItem>

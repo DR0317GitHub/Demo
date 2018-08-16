@@ -7,31 +7,36 @@ import {
   reqRegister,
   reqLogin,
   reqUpdateUser,
-  reqUser
+  reqUser,
+  reqUserList
 } from '../api'
+
+// 引入客户端io
+import io from 'socket.io-client'
 
 import {
   AUTH_SUCCESS,
   ERROR_MSG,
   RESET_USER,
-  RECEIVE_USER
+  RECEIVE_USER,
+  RECEIVE_USER_LIST
 } from './action-types'   // 有几个type就会有几个同步action
 
 // 注册/登陆成功的同步action
 const authSuccess = (user) => ({type: AUTH_SUCCESS, data: user})
 // 显示错误信息的同步action
 const errorMsg = (msg) => ({type: ERROR_MSG, data: msg})
-// 接收用户 信息的同步action
+// 接收用户信息的同步action
 const receiveUser = (user) => ({type: RECEIVE_USER, data: user})
 // 重置用户信息
-const resetUser = (msg) => ({type: RESET_USER, data: msg})
-
-
+export const resetUser = (msg) => ({type: RESET_USER, data: msg})
+// 接收用户列表的同步action
+const receiveUserList = (userList) => ({type: RECEIVE_USER_LIST, data: userList})
 
 /*
 注册的异步action
  */
-export function register({username, password,password2 ,type}) {
+export function register({username, password,password2, type}) {
   // 进行前台表单验证
   if(!username) {
     return errorMsg('用户名必须指定')
@@ -44,19 +49,21 @@ export function register({username, password,password2 ,type}) {
   }
 
   return async dispatch => {
+
     // 执行异步(发送ajax请求)
-   const response = await reqRegister({username, password, type})
-      // 异步得到结果,
-      const result = response.data // {code: 0, data: user} | {code: 1, msg: 'xxx'}
-      if(result.code===0) { // 成功
-        // 分发同步action(成功)
-        const user = result.data
-        dispatch(authSuccess(user))
-      } else { // 失败
-        // 分发同步action(成功)
-        const msg = result.msg
-        dispatch(errorMsg(msg))
-      }
+    const response = await reqRegister({username, password, type})
+    // 异步得到结果,
+    const result = response.data // {code: 0, data: user} | {code: 1, msg: 'xxx'}
+    if(result.code===0) { // 成功
+      // 分发同步action(成功)
+      const user = result.data
+      debugger
+      dispatch(authSuccess(user))
+    } else { // 失败
+      // 分发同步action(成功)
+      const msg = result.msg
+      dispatch(errorMsg(msg))
+    }
   }
 }
 
@@ -72,20 +79,17 @@ export function login({username, password}) {
       return dispatch(errorMsg('密码必须指定'))
     }
 
-
-    // 执行异步(发送ajax请求)
     const response = await reqLogin(username, password)
-    // 异步得到结果,
-      const result = response.data // {code: 0, data: user} | {code: 1, msg: 'xxx'}
-      if(result.code===0) { // 成功
-        // 分发同步action(成功)
-        const user = result.data
-        dispatch(authSuccess(user))
-      } else { // 失败
-        // 分发同步action(成功)
-        const msg = result.msg
-        dispatch(errorMsg(msg))
-      }
+    const result = response.data // {code: 0, data: user} | {code: 1, msg: 'xxx'}
+    if(result.code===0) { // 成功
+      // 分发同步action(成功)
+      const user = result.data
+      dispatch(authSuccess(user))
+    } else { // 失败
+      // 分发同步action(成功)
+      const msg = result.msg
+      dispatch(errorMsg(msg))
+    }
   }
 }
 
@@ -106,7 +110,6 @@ export function updateUser (user) {
   }
 }
 
-
 /*
 异步获取户信息
  */
@@ -121,6 +124,39 @@ export function getUser () {
     } else {
       dispatch(resetUser(result.msg))
     }
+  }
+}
+
+/*
+获取指定类型用户列表的异步action
+ */
+export function getUserList(type) {
+  return async dispatch => {
+    const response = await reqUserList(type)
+    const result = response.data
+    if(result.code===0) {
+      const userList = result.data
+      dispatch(receiveUserList(userList))
+    }
+  }
+}
+
+
+// 连接服务器, 得到代表连接的socket对象
+const socket = io('ws://localhost:4000')
+// 接收服务器发送过来的消息
+socket.on('recieveMsg', (chatMsg) => {
+  console.log('浏览器接收到服务发送的消息', chatMsg)
+})
+
+/*
+发聊天消息的异步action
+ */
+export function sendMsg({content, from, to}) {
+  return dispatch => {
+    // 浏览器向服务器发消息
+    socket.emit('sendMsg', {content, from, to})
+    console.log('浏览器向服务器发消息', {content, from, to})
   }
 }
 

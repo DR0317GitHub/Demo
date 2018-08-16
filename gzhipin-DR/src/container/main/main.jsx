@@ -1,8 +1,7 @@
-import React, {Component} from 'react';
-import {Route, Switch,Redirect} from 'react-router-dom'
-import {connect} from "react-redux";
+import React, {Component} from 'react'
+import {Route, Switch, Redirect} from 'react-router-dom'
+import {connect} from 'react-redux'
 import {NavBar} from 'antd-mobile'
-
 
 import LaobanInfo from '../laoban-info/laoban-info'
 import DashenInfo from '../dashen-info/dashen-info'
@@ -10,16 +9,23 @@ import Laoban from '../laoban/laoban'
 import Dashen from '../dashen/dashen'
 import Message from '../message/message'
 import Personal from '../personal/personal'
+import Chat from '../chat/chat'
 import NavFooter from '../../components/nav-footer/nav-footer'
 import NotFound from '../../components/not-found/not-found'
-import Cookies from 'js-cookie';
+import Cookies from 'js-cookie'
 
 import {getUser} from '../../redux/actions'
 import {getRedirectPath} from '../../utils'
+
 /*
 主界面路由组件
  */
 class Main extends Component {
+
+  /*
+  a = {}  // 给组件的实例对象添加属性,  后面访问: this.a
+  static b = {}  给组件类对象添加属性, 后面访问: Main.b
+   */
 
 
   // 给组件对象添加属性
@@ -54,26 +60,29 @@ class Main extends Component {
     }
   ]
 
+  /*static propTypes = {
 
-  componentDidMount(){
+  }*/
+
+  componentDidMount() {
     // 只有当前面登陆过, 但当前还没有登陆, 才去发请求获取用户信息
-    const userid = Cookies.get('userid');
+    const userid = Cookies.get('userid')
     const {user} = this.props
-    if(userid && !user._id){
+    if(userid && !user._id) {
       this.props.getUser()
     }
   }
 
   render () {
-    // 1). 如果cookie中没有userid, 直接跳转到登陆页面
-    const userid = Cookies.get('userid');
-    if(!userid){
-      return <Redirect to={'/login'}/>
-    }
 
+    // 1). 如果cookie中没有userid, 直接跳转到登陆页面
+    const userid = Cookies.get('userid')
+    if(!userid) {
+      return <Redirect to='/login'/>
+    }
     // 2). state中的user中没有_id, 发请求获取当前用户信息
-    const  {user} =this.props
-    if(!user._id){// 不能在render中发送ajax请求
+    const {user} = this.props
+    if(!user._id) { // 不能在render中发送ajax请求
       return <div>LOADING...</div>
     }
 
@@ -85,13 +94,28 @@ class Main extends Component {
       return <Redirect to={getRedirectPath(user.type, user.header)}/>
     }
 
-// 得到当前导航的信息对象
+    // 保存一隐藏nav的标识数据: hide: true
+    if(user.type==='laoban') {
+      if(path==='/dashen') { // 如果是老板, 请求/dashen, 自动跳转到/laoban
+        return <Redirect to='/laoban'/>
+      }
+      this.navList[1].hide = true
+    } else {
+      if(path==='/laoban') { // 如果是大神, 请求/laoban, 自动跳转到/dashen
+        return <Redirect to='/dashen'/>
+      }
+      this.navList[0].hide = true
+    }
+
+
+
+    // 得到当前导航的信息对象
     // find()返回的是第一次回调函数返回true的对应的元素, 如果没有一匹配的, 返回undefined
     const currentNav = this.navList.find((nav, index) => nav.path===path)
 
     return (
       <div>
-        {currentNav ? <NavBar>{currentNav.title}</NavBar> : null}
+        {currentNav ? <NavBar className='fix-top'>{currentNav.title}</NavBar> : null}
 
         <Switch>
           <Route path='/laobaninfo' component={LaobanInfo}/>
@@ -101,9 +125,11 @@ class Main extends Component {
           <Route path='/dashen' component={Dashen}/>
           <Route path='/message' component={Message}/>
           <Route path='/personal' component={Personal}/>
+          <Route path='/chat/:userid' component={Chat}/>
+
           <Route component={NotFound}/>
         </Switch>
-        {currentNav ? <NavFooter/> : null}
+        {currentNav ? <NavFooter navList={this.navList}/> : null}
       </div>
     )
   }
@@ -115,8 +141,6 @@ export default connect(
   {getUser}
 )(Main)
 
-
-
 /*
 1. 实现自动登陆
   1). 如果cookie中没有userid, 直接跳转到登陆页面
@@ -124,14 +148,3 @@ export default connect(
 2. 如果当前已经登陆, 且请求的是根路径 : /
   1). 根据当前用户的相关信息, 自动跳转对应的界面
  */
-
-/*
-当点击用户信息中保存的后
-  1.判断用户是否登录,如果没有登录直接跳转至登录页面
-  2.判断用户之前知否登陆过,如果之前登陆过,但是当前状态下没有登录,发请求获取当前用户信息
-      在componentDidMount()中发送请求  调用this.props.getUser()这个函数,
-      getUser()这个函数在action文件中,getUser()函数中发送了异步请求,在api中的index中写入
-  3.得到当前请求的path
-     判断请求的路径是否是/
-    根据当前用户的相关信息, 自动跳转对应的界面
-*/

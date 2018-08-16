@@ -1,16 +1,24 @@
-import React ,{Component} from 'react';
-import {connect} from 'react-redux';
+import React, {Component} from 'react'
+import {connect} from 'react-redux'
 
-class Dashen extends Component{
+import {getUserList} from '../../redux/actions'
 
-  render(){
-    return(
-      <div>dashen</div>
+import UserList from '../../components/user-list/user-list'
+
+class Dashen extends Component {
+  componentDidMount () {
+    // 分发异步action, 获取指定类型的用户列表
+    this.props.getUserList('laoban')
+  }
+
+  render () {
+    return (
+      <UserList userList={this.props.userList}/>
     )
   }
 }
 
 export default connect(
-  state  =>({}),
-  {}
+  state => ({userList: state.userList}),
+  {getUserList}
 )(Dashen)
