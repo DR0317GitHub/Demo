@@ -8,7 +8,9 @@ import {
   ERROR_MSG,
   RESET_USER,
   RECEIVE_USER,
-  RECEIVE_USER_LIST
+  RECEIVE_USER_LIST,
+  RECEIVE_CHAT_MSGS,
+  RECEIVE_CHAT_MSG
 } from './action-types'
 
 const initUser = {
@@ -19,8 +21,10 @@ const initUser = {
 }
 function user (state=initUser, action) {
   switch (action.type) {
+    //注册成功获取数据后,定义一个变量为user,接收action身上携带的数据
+    //  返回一个对象,里面包含所得的数据getRedirectPath文件中,封装了一个动态添加的路径,
+    // 将用户的类型,和头像图片挂在user函数上返回,通过容器组件传入给组件register
     case AUTH_SUCCESS:
-      debugger
       const user = action.data
       return {...user, redirectTo:getRedirectPath(user.type, user.header)}
     case ERROR_MSG:
@@ -45,10 +49,38 @@ function userList(state=initUserList, action) {
   }
 }
 
+const initChat = {
+  users: {}, // 所有用户信息对象的对象容器: key是user的_id, value是{username, header}
+  chatMsgs: [], // 当前用户相关的所有chatMsg的数组
+  unReadCount: 0, // 总的未读数量
+}
+function chat(state=initChat, action) {
+  switch (action.type) {
+    case RECEIVE_CHAT_MSGS:
+      const {users, chatMsgs} = action.data
+      return {
+        users,
+        chatMsgs,
+        unReadCount: 0,
+      }
+    case RECEIVE_CHAT_MSG:
+      const chatMsg = action.data
+      return {
+        users: state.users,
+        chatMsgs: [...state.chatMsgs, chatMsg],
+        unReadCount: 0,
+      }
+    default:
+      return state
+  }
+}
+
+
 
 export default combineReducers({
   user,
-  userList
+  userList,
+  chat
 })
 /*
 1. 向外暴露是一个整合后的reducer函数: function (state, action)

@@ -29,6 +29,7 @@ class Register extends Component {
   // 请求注册
   register = () => {
     console.log(this.state)
+    /*发送ajax请求*/
     this.props.register(this.state)
   }
 
@@ -90,3 +91,12 @@ export default connect(
     distpatch(register(user))
   }
  */
+
+
+/*
+* state => ({user: state.user})是reducers传过来的一般函数,里面携带所需要的数据状态
+* {register}是actions传过来的异步函数,将用户写入的数据,传入到actions
+*
+*
+*
+* */
